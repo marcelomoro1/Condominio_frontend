@@ -1,72 +1,209 @@
 "use client";
 import { useState, useEffect } from "react";
 import api from "../../services/api";
+import { 
+  UserCheck, 
+  Pencil, 
+  Trash2, 
+  PlusCircle, 
+  User, 
+  CreditCard,
+  Search,
+  ChevronDown
+} from "lucide-react";
 
 export default function VisitantesPage() {
- const [visitantes, setVisitantes] = useState<any[]>([]);
- const [form, setForm] = useState({ ID_PESSOA: "", DOCUMENTO: "" });
- const [editId, setEditId] = useState<number | null>(null);
+  const [visitantes, setVisitantes] = useState<any[]>([]);
+  const [form, setForm] = useState({ ID_PESSOA: "", DOCUMENTO: "" });
+  const [editId, setEditId] = useState<number | null>(null);
 
- useEffect(() => { carregar(); }, []);
+  useEffect(() => { carregar(); }, []);
 
- const carregar = async () => {
-   try {
-     const res = await api.get("/visitantes");
-     setVisitantes(res.data);
-   } catch (error) {
-     console.error("Erro ao carregar visitantes:", error);
-   }
- };
+  const carregar = async () => {
+    try {
+      const res = await api.get("/visitantes");
+      setVisitantes(res.data);
+    } catch (error) {
+      console.error("Erro ao carregar visitantes:", error);
+    }
+  };
 
- const handleSubmit = async (e: any) => {
-   e.preventDefault();
-   try {
-     if (editId) {
-       await api.put(`/visitantes/${editId}`, form);
-       setEditId(null);
-     } else {
-       await api.post("/visitantes", form);
-     }
-     setForm({ ID_PESSOA: "", DOCUMENTO: "" });
-     carregar();
-   } catch (error) {
-     console.error("Erro ao salvar visitante:", error);
-   }
- };
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    try {
+      if (editId) {
+        await api.put(`/visitantes/${editId}`, form);
+        setEditId(null);
+      } else {
+        await api.post("/visitantes", form);
+      }
+      setForm({ ID_PESSOA: "", DOCUMENTO: "" });
+      carregar();
+    } catch (error) {
+      console.error("Erro ao salvar visitante:", error);
+    }
+  };
 
- const handleDelete = async (id: number) => {
-   if (confirm("Deseja excluir este visitante?")) {
-     try {
-       await api.delete(`/visitantes/${id}`);
-       carregar();
-     } catch (error) {
-       console.error("Erro ao excluir visitante:", error);
-     }
-   }
- };
+  const handleDelete = async (id: number) => {
+    if (confirm("Deseja excluir este visitante?")) {
+      try {
+        await api.delete(`/visitantes/${id}`);
+        carregar();
+      } catch (error) {
+        console.error("Erro ao excluir visitante:", error);
+      }
+    }
+  };
 
- const handleEdit = (v: any) => {
-   setForm({ ID_PESSOA: v.ID_PESSOA, DOCUMENTO: v.DOCUMENTO });
-   setEditId(v.ID_VISITANTE);
- };
+  const handleEdit = (v: any) => {
+    setForm({ ID_PESSOA: v.ID_PESSOA, DOCUMENTO: v.DOCUMENTO });
+    setEditId(v.ID_VISITANTE);
+  };
 
- return (
-   <div className="p-6">
-     <h1 className="text-xl font-bold">Cadastro de Visitantes</h1>
-     <form onSubmit={handleSubmit} className="flex gap-2 mt-4">
-       <input className="border p-2" placeholder="ID Pessoa" value={form.ID_PESSOA} onChange={e => setForm({ ...form, ID_PESSOA: e.target.value })}/>
-       <input className="border p-2" placeholder="Documento" value={form.DOCUMENTO} onChange={e => setForm({ ...form, DOCUMENTO: e.target.value })}/>
-       <button className="bg-blue-500 text-white px-4 py-2 rounded">{editId ? "Atualizar" : "Salvar"}</button>
-     </form>
-     <ul className="mt-6">
-       {visitantes.map((v: any) => (
-         <li key={v.ID_VISITANTE} className="flex gap-2 items-center border-b py-2">
-           <span className="flex-1">Pessoa {v.ID_PESSOA} - Documento {v.DOCUMENTO}</span>
-           <button onClick={() => handleEdit(v)} className="bg-yellow-500 text-white px-2 py-1 rounded">Editar</button>
-           <button onClick={() => handleDelete(v.ID_VISITANTE)} className="bg-red-500 text-white px-2 py-1 rounded">Excluir</button>
-         </li>
-       ))}
-     </ul>
-   </div>
- );
+  return (
+    <div className="min-h-screen bg-white p-8 lg:p-14">
+      {/* Integrated Header */}
+      <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-8">
+        <div className="flex items-center gap-5">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+            <UserCheck size={28} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Portaria / Visitantes</h1>
+            <p className="text-slate-400 text-sm font-medium">Controle de acesso e registros de entrada</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="relative hidden md:block">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input 
+              type="text" 
+              placeholder="Buscar visitantes..." 
+              className="bg-slate-50 border border-slate-100 rounded-2xl pl-11 pr-4 py-3 text-sm w-64 focus:ring-2 focus:ring-emerald-500/10 transition-all outline-none"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+        {/* Form Column */}
+        <div className="lg:col-span-4">
+          <div className="sticky top-8">
+            <h2 className="text-lg font-bold text-slate-800 mb-8 flex items-center gap-2">
+              {editId ? "Editar Visitante" : "Registrar Entrada"}
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">ID da Pessoa</label>
+                <div className="relative">
+                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                  <input 
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-emerald-500/5 focus:bg-white focus:border-emerald-200 outline-none transition-all text-sm font-medium"
+                    placeholder="ID do cadastro base" value={form.ID_PESSOA}
+                    onChange={e => setForm({ ...form, ID_PESSOA: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Documento de Identificação</label>
+                <div className="relative">
+                  <CreditCard size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                  <input 
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-emerald-500/5 focus:bg-white focus:border-emerald-200 outline-none transition-all text-sm font-medium"
+                    placeholder="RG, CPF ou CNH" value={form.DOCUMENTO}
+                    onChange={e => setForm({ ...form, DOCUMENTO: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-emerald-100 active:scale-[0.98] flex items-center justify-center gap-2">
+                <PlusCircle size={18} />
+                {editId ? "Atualizar Registro" : "Liberar Acesso"}
+              </button>
+              
+              {editId && (
+                <button 
+                  type="button"
+                  onClick={() => { setEditId(null); setForm({ ID_PESSOA: "", DOCUMENTO: "" }); }}
+                  className="w-full text-slate-400 font-bold text-xs uppercase tracking-widest py-2 hover:text-slate-600 transition-colors"
+                >
+                  Cancelar Edição
+                </button>
+              )}
+            </form>
+          </div>
+        </div>
+
+        {/* List Column */}
+        <div className="lg:col-span-8">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-lg font-bold text-slate-800">Visitantes no Local</h2>
+            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">{visitantes.length} Ativos</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-separate border-spacing-y-4">
+              <thead>
+                <tr className="text-slate-400">
+                  <th className="px-6 py-2 text-xs font-bold uppercase tracking-widest">Informações</th>
+                  <th className="px-6 py-2 text-xs font-bold uppercase tracking-widest">Documentação</th>
+                  <th className="px-6 py-2 text-xs font-bold uppercase tracking-widest text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visitantes.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="px-6 py-20 text-center text-slate-300 font-medium">Nenhum visitante registrado.</td>
+                  </tr>
+                ) : (
+                  visitantes.map((v: any) => (
+                    <tr key={v.ID_VISITANTE} className="group">
+                      <td className="px-6 py-5 bg-slate-50/50 rounded-l-[1.5rem] border-y border-l border-slate-100 group-hover:bg-emerald-50/30 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-white border border-slate-100 text-emerald-600 rounded-xl flex items-center justify-center font-bold shadow-sm">
+                            <UserCheck size={20} />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-700 leading-tight">Visitante (ID: {v.ID_PESSOA})</span>
+                            <span className="text-xs text-slate-400 font-medium">Cadastro vinculado</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 bg-slate-50/50 border-y border-slate-100 group-hover:bg-emerald-50/30 transition-colors">
+                        <span className="font-mono text-xs font-bold text-slate-500 bg-white px-2 py-1 rounded-lg border border-slate-100 shadow-sm">
+                          {v.DOCUMENTO}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5 bg-slate-50/50 rounded-r-[1.5rem] border-y border-r border-slate-100 text-right group-hover:bg-emerald-50/30 transition-colors">
+                        <div className="flex justify-end gap-2">
+                          <button 
+                            onClick={() => handleEdit(v)} 
+                            className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-white rounded-xl transition-all shadow-sm active:scale-95"
+                            title="Editar"
+                          >
+                            <Pencil size={18} />
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(v.ID_VISITANTE)} 
+                            className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-white rounded-xl transition-all shadow-sm active:scale-95"
+                            title="Excluir"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
